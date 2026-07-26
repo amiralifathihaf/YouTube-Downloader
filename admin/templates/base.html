@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}پنل مدیریت{% endblock %} - YT Downloader</title>
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="admin-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <i class="fab fa-youtube"></i>
+                <span>YT Downloader</span>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="/dashboard" class="nav-item {% if request.endpoint == 'dashboard' %}active{% endif %}">
+                    <i class="fas fa-tachometer-alt"></i> داشبورد
+                </a>
+                <a href="/users" class="nav-item {% if request.endpoint == 'users' %}active{% endif %}">
+                    <i class="fas fa-users"></i> کاربران
+                </a>
+                <a href="/broadcast" class="nav-item {% if request.endpoint == 'broadcast' %}active{% endif %}">
+                    <i class="fas fa-bullhorn"></i> پیام همگانی
+                </a>
+                <a href="/settings" class="nav-item {% if request.endpoint == 'settings' %}active{% endif %}">
+                    <i class="fas fa-cog"></i> تنظیمات
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <a href="/" target="_blank" class="nav-item"><i class="fas fa-external-link-alt"></i> ربات</a>
+                <a href="/logout" class="nav-item logout"><i class="fas fa-sign-out-alt"></i> خروج</a>
+            </div>
+        </aside>
+        <main class="main-content">
+            <header class="topbar">
+                <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open')">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h1>{% block page_title %}داشبورد{% endblock %}</h1>
+            </header>
+            <div class="content">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for cat, msg in messages %}
+                        <div class="alert alert-{{ cat }}">{{ msg }}</div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+    </div>
+    <script>
+        setTimeout(() => {
+            document.querySelectorAll('.alert').forEach(el => el.style.display = 'none');
+        }, 3000);
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

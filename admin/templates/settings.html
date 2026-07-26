@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}تنظیمات{% endblock %}
+{% block page_title %}⚙️ تنظیمات ربات{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h3><i class="fas fa-robot"></i> توکن ربات تلگرام</h3>
+    <form method="POST" class="settings-form">
+        <input type="hidden" name="action" value="update_token">
+        <div class="form-group">
+            <label>Bot Token</label>
+            <input type="text" name="bot_token" value="{{ bot_token }}" placeholder="123456789:ABCdefGHIjklMNOpqrsTUVwxyz">
+            <small>توکن ربات را از <a href="https://t.me/BotFather" target="_blank">@BotFather</a> دریافت کنید.</small>
+        </div>
+        <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> ذخیره توکن</button>
+    </form>
+</div>
+
+<div class="card">
+    <h3><i class="fas fa-key"></i> تغییر رمز عبور</h3>
+    <form method="POST" class="settings-form">
+        <input type="hidden" name="action" value="update_password">
+        <div class="form-group">
+            <label>رمز عبور جدید</label>
+            <input type="password" name="new_password" required placeholder="رمز جدید">
+        </div>
+        <div class="form-group">
+            <label>تأیید رمز عبور</label>
+            <input type="password" name="confirm_password" required placeholder="رمز را دوباره وارد کنید">
+        </div>
+        <button type="submit" class="btn btn-warning"><i class="fas fa-key"></i> تغییر رمز</button>
+    </form>
+</div>
+
+<div class="card">
+    <h3><i class="fas fa-sliders-h"></i> محدودیت دانلود روزانه</h3>
+    <form method="POST" class="settings-form">
+        <input type="hidden" name="action" value="update_limit">
+        <div class="form-group">
+            <label>حداکثر دانلود روزانه (پیش‌فرض برای کاربران جدید)</label>
+            <input type="number" name="daily_limit" value="{{ daily_limit }}" min="1" max="100">
+        </div>
+        <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> ذخیره</button>
+    </form>
+</div>
+{% endblock %}

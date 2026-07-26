@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}کاربران{% endblock %}
+{% block page_title %}👥 مدیریت کاربران{% endblock %}
+
+{% block content %}
+<div class="card">
+    <form method="GET" class="search-form">
+        <input type="text" name="q" value="{{ search }}" placeholder="جستجو با نام کاربری، آیدی یا نام...">
+        <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> جستجو</button>
+        {% if search %}<a href="/users" class="btn btn-secondary">پاک کردن</a>{% endif %}
+    </form>
+</div>
+
+<div class="card">
+    <table class="table">
+        <thead>
+            <tr><th>آیدی</th><th>نام کاربری</th><th>نام</th><th>دانلود امروز</th><th>محدودیت</th><th>کل دانلود</th><th>وضعیت</th><th>عملیات</th></tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td><code>{{ user.user_id }}</code></td>
+                <td>{{ user.username or '-' }}</td>
+                <td>{{ user.full_name or '-' }}</td>
+                <td>{{ user.daily_downloads }} / {{ user.daily_limit }}</td>
+                <td>
+                    <form method="POST" action="/users/{{ user.user_id }}/set-limit" class="inline-form">
+                        <input type="number" name="limit" value="{{ user.daily_limit }}" min="1" max="100" class="small-input">
+                        <button type="submit" class="btn btn-sm btn-primary"><i class="fas fa-check"></i></button>
+                    </form>
+                </td>
+                <td>{{ user.total_downloads }}</td>
+                <td>
+                    {% if user.is_banned %}<span class="badge badge-danger">بن شده</span>
+                    {% else %}<span class="badge badge-success">فعال</span>{% endif %}
+                </td>
+                <td>
+                    <form method="POST" action="/users/{{ user.user_id }}/toggle-ban" class="inline-form">
+                        {% if user.is_banned %}
+                        <button type="submit" class="btn btn-sm btn-success"><i class="fas fa-unlock"></i> آنبان</button>
+                        {% else %}
+                        <button type="submit" class="btn btn-sm btn-danger"><i class="fas fa-ban"></i> بن</button>
+                        {% endif %}
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+            {% if not users %}<tr><td colspan="8" class="text-center">کاربری یافت نشد</td></tr>{% endif %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

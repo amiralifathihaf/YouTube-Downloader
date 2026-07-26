@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}پیام همگانی{% endblock %}
+{% block page_title %}📢 ارسال پیام همگانی{% endblock %}
+
+{% block content %}
+<div class="card">
+    <form method="POST" class="broadcast-form">
+        <div class="form-group">
+            <label><i class="fas fa-envelope"></i> متن پیام</label>
+            <textarea name="message" rows="5" required placeholder="متن پیام همگانی را اینجا بنویسید..."></textarea>
+            <small>پیام به تمام کاربران فعال (بن نشده) ارسال می‌شود. از HTML برای قالب‌بندی استفاده کنید.</small>
+        </div>
+        <button type="submit" class="btn btn-primary" onclick="return confirm('آیا از ارسال پیام به همه کاربران مطمئن هستید؟')">
+            <i class="fas fa-paper-plane"></i> ارسال پیام
+        </button>
+    </form>
+</div>
+
+{% if logs %}
+<div class="card">
+    <h3><i class="fas fa-history"></i> تاریخچه ارسال‌ها</h3>
+    <table class="table">
+        <thead><tr><th>پیام</th><th>ارسال شده به</th><th>تاریخ</th></tr></thead>
+        <tbody>
+            {% for log in logs %}
+            <tr>
+                <td>{{ log.message[:80] }}{% if log.message|length > 80 %}...{% endif %}</td>
+                <td>{{ log.sent_to }} نفر</td>
+                <td>{{ log.created_at }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+{% endblock %}

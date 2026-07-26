@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ورود به پنل مدیریت</title>
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="login-body">
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <i class="fab fa-youtube login-icon"></i>
+                <h1>YT Downloader</h1>
+                <p>پنل مدیریت</p>
+            </div>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for cat, msg in messages %}
+                    <div class="alert alert-{{ cat }}">{{ msg }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            <form method="POST" class="login-form">
+                <div class="form-group">
+                    <label><i class="fas fa-lock"></i> رمز عبور</label>
+                    <input type="password" name="password" required placeholder="رمز عبور را وارد کنید" autofocus>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">
+                    <i class="fas fa-sign-in-alt"></i> ورود
+                </button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
