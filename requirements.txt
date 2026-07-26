@@ -1,0 +1,12 @@
+# YT Downloader Bot - Requirements
+# Core
+python-telegram-bot==21.6
+yt-dlp>=2024.1.1
+flask>=3.0.0
+
+# Database (built-in sqlite3, no extra needed)
+# Utilities
+requests>=2.31.0
+
+# Optional: for better performance
+# gunicorn>=21.2.0  # For production deployment
