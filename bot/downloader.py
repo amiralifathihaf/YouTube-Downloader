@@ -1,4 +1,3 @@
-"""YouTube download logic using yt-dlp."""
 
 import os
 import re
@@ -8,7 +7,6 @@ from config import DOWNLOAD_DIR
 
 
 def get_video_info(url):
-    """Get video info (title, formats) without downloading."""
     os.makedirs(DOWNLOAD_DIR, exist_ok=True)
     try:
         result = subprocess.run(
@@ -33,7 +31,6 @@ def get_video_info(url):
 
 
 def is_youtube_url(url):
-    """Check if a URL is a YouTube URL."""
     patterns = [
         r"(?:https?://)?(?:www\.)?youtube\.com/watch\?v=[\w-]+",
         r"(?:https?://)?(?:www\.)?youtu\.be/[\w-]+",
@@ -44,19 +41,8 @@ def is_youtube_url(url):
 
 
 def download_video(url, quality="720", message_callback=None):
-    """Download a YouTube video in the specified quality.
-    
-    Args:
-        url: YouTube video URL
-        quality: '480', '720', or '1080'
-        message_callback: Optional callback for progress updates
-    
-    Returns:
-        Path to downloaded file, or None on failure
-    """
     os.makedirs(DOWNLOAD_DIR, exist_ok=True)
     
-    # Quality format strings for yt-dlp
     quality_map = {
         "1080": "bestvideo[height<=1080][ext=mp4]+bestaudio[ext=m4a]/best[height<=1080]",
         "720": "bestvideo[height<=720][ext=mp4]+bestaudio[ext=m4a]/best[height<=720]",
@@ -93,7 +79,6 @@ def download_video(url, quality="720", message_callback=None):
         if os.path.exists(filepath):
             return filepath
         
-        # Fallback: find the file
         for f in os.listdir(DOWNLOAD_DIR):
             if f.startswith(video_id):
                 return os.path.join(DOWNLOAD_DIR, f)
@@ -109,7 +94,6 @@ def download_video(url, quality="720", message_callback=None):
 
 
 def extract_youtube_id(url):
-    """Extract video ID from YouTube URL."""
     patterns = [
         r"(?:v=|/v/|youtu\.be/)([\w-]{11})",
         r"(?:shorts/)([\w-]{11})",

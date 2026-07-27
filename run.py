@@ -1,21 +1,9 @@
-#!/usr/bin/env python3
-"""
-YT Downloader Bot + Admin Panel
-Main entry point - starts both bot and web admin.
-
-Usage:
-    python run.py              # Start both bot + admin
-    python run.py --admin      # Start admin panel only
-    python run.py --bot        # Start bot only
-    python run.py --setup      # First-time setup
-"""
 
 import sys
 import os
 import threading
 import argparse
 
-# Add project root to path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from database import init_db, get_setting
@@ -23,13 +11,11 @@ from config import ADMIN_DEFAULT_PASSWORD
 
 
 def run_admin_panel():
-    """Run the Flask admin panel."""
     from admin.app import run_admin
     run_admin(host="0.0.0.0", port=5001)
 
 
 def run_telegram_bot():
-    """Run the Telegram bot."""
     token = get_setting("bot_token")
     if not token:
         print("⚠️  توکن ربات تنظیم نشده!")
@@ -43,7 +29,6 @@ def run_telegram_bot():
 
 
 def first_time_setup():
-    """First-time setup wizard."""
     print("=" * 50)
     print("🎬 YT Downloader Bot - Setup Wizard")
     print("=" * 50)
@@ -81,7 +66,6 @@ def main():
         first_time_setup()
         return
     
-    # Initialize database
     init_db()
     
     print("=" * 50)
@@ -94,7 +78,6 @@ def main():
     elif args.bot:
         run_telegram_bot()
     else:
-        # Start admin in a separate thread
         admin_thread = threading.Thread(target=run_admin_panel, daemon=True)
         admin_thread.start()
         
@@ -102,7 +85,6 @@ def main():
         print(f"🔑 Password: {ADMIN_DEFAULT_PASSWORD}")
         print()
         
-        # Start bot in main thread
         run_telegram_bot()
 
 

@@ -1,4 +1,3 @@
-"""Flask Admin Panel for YT Downloader Bot."""
 
 import os
 import sys
@@ -19,7 +18,6 @@ app.secret_key = secrets.token_hex(32)
 
 
 def admin_required(f):
-    """Decorator to require admin authentication."""
     @wraps(f)
     def decorated(*args, **kwargs):
         if not session.get("admin_logged_in"):
@@ -30,7 +28,6 @@ def admin_required(f):
 
 @app.route("/")
 def index():
-    """Redirect to dashboard."""
     if session.get("admin_logged_in"):
         return redirect(url_for("dashboard"))
     return redirect(url_for("login"))
@@ -38,7 +35,6 @@ def index():
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
-    """Admin login page."""
     if request.method == "POST":
         password = request.form.get("password", "")
         stored_password = get_setting("admin_password", ADMIN_DEFAULT_PASSWORD)
@@ -54,7 +50,6 @@ def login():
 
 @app.route("/logout")
 def logout():
-    """Admin logout."""
     session.clear()
     flash("خروج موفق بودید.", "info")
     return redirect(url_for("login"))
@@ -63,7 +58,6 @@ def logout():
 @app.route("/dashboard")
 @admin_required
 def dashboard():
-    """Admin dashboard with stats."""
     stats = get_stats()
     return render_template("dashboard.html", stats=stats)
 
@@ -71,7 +65,6 @@ def dashboard():
 @app.route("/settings", methods=["GET", "POST"])
 @admin_required
 def settings():
-    """Bot settings (token, password, daily limit)."""
     if request.method == "POST":
         action = request.form.get("action", "")
 
@@ -111,7 +104,6 @@ def settings():
 @app.route("/users")
 @admin_required
 def users():
-    """Manage users."""
     search = request.args.get("q", "").strip()
     if search:
         user_list = search_users(search)
@@ -123,7 +115,6 @@ def users():
 @app.route("/users/<int:user_id>/toggle-ban", methods=["POST"])
 @admin_required
 def user_toggle_ban(user_id):
-    """Ban/unban a user."""
     toggle_ban(user_id)
     flash("وضعیت بن کاربر تغییر کرد! ✅", "success")
     return redirect(url_for("users"))
@@ -132,7 +123,6 @@ def user_toggle_ban(user_id):
 @app.route("/users/<int:user_id>/set-limit", methods=["POST"])
 @admin_required
 def user_set_limit(user_id):
-    """Set user's daily download limit."""
     limit = request.form.get("limit", "10")
     try:
         set_user_limit(user_id, int(limit))
@@ -145,7 +135,6 @@ def user_set_limit(user_id):
 @app.route("/broadcast", methods=["GET", "POST"])
 @admin_required
 def broadcast():
-    """Send broadcast message to all users."""
     if request.method == "POST":
         message = request.form.get("message", "").strip()
         if message:
@@ -181,7 +170,6 @@ def broadcast():
 @app.route("/api/stats")
 @admin_required
 def api_stats():
-    """API endpoint for live stats."""
     stats = get_stats()
     return jsonify({
         "total_users": stats["total_users"],
@@ -192,7 +180,6 @@ def api_stats():
 
 
 def run_admin(host="0.0.0.0", port=5001):
-    """Run the admin panel."""
     init_db()
     print(f"🌐 Admin Panel: http://{host}:{port}")
     print(f"🔑 Default Password: {ADMIN_DEFAULT_PASSWORD}")

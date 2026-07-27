@@ -1,4 +1,3 @@
-"""Telegram bot handlers for YouTube Downloader."""
 
 import os
 import sys
@@ -16,12 +15,10 @@ from bot.downloader import get_video_info, download_video, is_youtube_url, extra
 
 logger = logging.getLogger(__name__)
 
-# Store pending downloads per user
 pending_downloads = {}
 
 
 async def start_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Handle /start command."""
     user = update.effective_user
     register_user(user.id, user.username, user.full_name)
     
@@ -45,7 +42,6 @@ async def start_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def help_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Handle /help command."""
     help_text = """📖 **راهنمای ربات**
 
 🔹 لینک ویدیوی یوتیوب را بفرستید
@@ -69,7 +65,6 @@ async def help_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def status_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Handle /status command - show user's download status."""
     user_id = update.effective_user.id
     user = get_user(user_id)
     
@@ -94,7 +89,6 @@ async def status_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Handle incoming messages - check for YouTube URLs."""
     message = update.message
     if not message or not message.text:
         return
@@ -102,10 +96,8 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = message.text.strip()
     user = update.effective_user
     
-    # Register user
     register_user(user.id, user.username, user.full_name)
     
-    # Check if it's a YouTube URL
     if not is_youtube_url(text):
         await message.reply_text(
             "🔗 لطفاً یک لینک معتبر یوتیوب بفرستید.\n\n"
@@ -115,7 +107,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         return
     
-    # Check if user can download
     can_dl, reason = can_user_download(user.id)
     if not can_dl:
         if reason == "banned":
@@ -127,7 +118,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             )
         return
     
-    # Get video info
     status_msg = await message.reply_text("🔍 در حال دریافت اطلاعات ویدیو...")
     
     video_info = get_video_info(text)
@@ -138,7 +128,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         return
     
-    # Store video info for this user
     pending_downloads[user.id] = {
         "url": video_info["webpage_url"],
         "title": video_info["title"],
@@ -146,7 +135,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "duration": video_info.get("duration", 0),
     }
     
-    # Format duration
     duration = video_info.get("duration", 0)
     if duration:
         mins, secs = divmod(int(duration), 60)
@@ -154,7 +142,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         dur_str = "نامشخص"
     
-    # Show video info and quality selection with colorful buttons
     title = video_info["title"][:80]
     info_text = f"""🎬 **{title}**
 
@@ -163,7 +150,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 یک کیفیت انتخاب کنید:"""
     
-    # Quality selection buttons (Telegram Bot API v9 - colorful buttons)
     keyboard = [
         [
             InlineKeyboardButton("📱 480p (SD)", callback_data="dl_480"),
@@ -194,7 +180,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def quality_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Handle quality selection callback."""
     query = update.callback_query
     user_id = query.from_user.id
     data = query.data
@@ -211,12 +196,10 @@ async def quality_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     quality = data.replace("dl_", "")
     
-    # Check if user has a pending download
     if user_id not in pending_downloads:
         await query.edit_message_text("⚠️ لطفاً ابتدا لینک ویدیو را بفرستید.")
         return
     
-    # Check user limits again
     can_dl, reason = can_user_download(user_id)
     if not can_dl:
         pending_downloads.pop(user_id, None)
@@ -230,7 +213,6 @@ async def quality_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     url = video_data["url"]
     title = video_data["title"]
     
-    # Update message
     quality_names = {"480": "480p (SD)", "720": "720p (HD)", "1080": "1080p (Full HD)"}
     await query.edit_message_text(
         f"⏳ **در حال دانلود...**\n\n"
@@ -240,7 +222,6 @@ async def quality_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         parse_mode="Markdown"
     )
     
-    # Download the video
     try:
         filepath = download_video(url, quality)
         
@@ -248,7 +229,6 @@ async def quality_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             file_size = os.path.getsize(filepath)
             file_size_mb = file_size / (1024 * 1024)
             
-            # Check Telegram file size limit (50MB for bots)
             if file_size_mb > 50:
                 pending_downloads.pop(user_id, None)
                 await query.edit_message_text(
@@ -257,7 +237,6 @@ async def quality_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 )
                 return
             
-            # Send the video
             await query.edit_message_text("📤 در حال ارسال ویدیو...")
             
             with open(filepath, "rb") as video_file:
@@ -269,16 +248,13 @@ async def quality_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     write_timeout=120,
                 )
             
-            # Record download
             increment_download(user_id, url, title, quality, file_size)
             
-            # Delete the file
             try:
                 os.remove(filepath)
             except OSError:
                 pass
             
-            # Update status message
             await query.edit_message_text(
                 f"✅ **دانلود موفق!**\n\n"
                 f"🎬 {title[:50]}\n"
@@ -298,12 +274,10 @@ async def quality_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "لطفاً دوباره تلاش کنید."
         )
     
-    # Clean up
     pending_downloads.pop(user_id, None)
 
 
 async def post_init(application: Application):
-    """Set bot commands after initialization."""
     commands = [
         BotCommand("start", "شروع و خوش‌آمدگویی"),
         BotCommand("help", "راهنمای استفاده"),
@@ -314,12 +288,10 @@ async def post_init(application: Application):
 
 
 def run_bot(token: str):
-    """Run the Telegram bot."""
     init_db()
     
     application = Application.builder().token(token).post_init(post_init).build()
     
-    # Register handlers
     application.add_handler(CommandHandler("start", start_cmd))
     application.add_handler(CommandHandler("help", help_cmd))
     application.add_handler(CommandHandler("status", status_cmd))
